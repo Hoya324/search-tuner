@@ -1,0 +1,34 @@
+[versions]
+kotlin = "2.1.20"
+spring-boot = "3.4.3"
+spring-dependency-management = "1.1.7"
+spring-ai = "1.0.0"
+elasticsearch-client = "8.17.0"
+springdoc = "2.8.5"
+mysql-connector = "8.0.33"
+commons-math = "3.6.1"
+jackson = "2.18.3"
+
+[libraries]
+spring-boot-starter = { module = "org.springframework.boot:spring-boot-starter" }
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
+spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa" }
+spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
+kotlin-test-junit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+spring-ai-openai-starter = { module = "org.springframework.ai:spring-ai-starter-model-openai", version.ref = "spring-ai" }
+elasticsearch-java = { module = "co.elastic.clients:elasticsearch-java", version.ref = "elasticsearch-client" }
+springdoc-openapi-webmvc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+mysql-connector-j = { module = "com.mysql:mysql-connector-j", version.ref = "mysql-connector" }
+commons-math3 = { module = "org.apache.commons:commons-math3", version.ref = "commons-math" }
+jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin" }
+jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
