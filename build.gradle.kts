@@ -30,3 +30,9 @@ subprojects {
         useJUnitPlatform()
     }
 }
+
+tasks.register("testAll") {
+    group = "verification"
+    description = "Run all tests in all submodules"
+    dependsOn(subprojects.map { "${it.path}:test" })
+}
