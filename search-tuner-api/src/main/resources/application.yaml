@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: search-tuner
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/search_tuner?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:tuner}
+    password: ${SPRING_DATASOURCE_PASSWORD:tuner123}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: false
+
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        options:
+          model: ${OPENAI_MODEL:gpt-4o-mini}
+          temperature: 0.1
+
+es:
+  host: ${ES_HOST:localhost}
+  port: ${ES_PORT:9200}
+  synonyms:
+    path: ${ES_SYNONYMS_PATH:./docker/elasticsearch/config/synonyms/product_synonyms.txt}
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /api-docs
+
+logging:
+  level:
+    com.kst.searchtuner: INFO
+    org.springframework.ai: WARN

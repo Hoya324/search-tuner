@@ -1,0 +1,808 @@
+queries:
+  # 브랜드 동의어 (한글/영문) - 20개
+  - id: "Q001"
+    query: "캐구 패딩"
+    intent: "캐나다구스 브랜드 패딩 상품 검색 (줄임말)"
+    expected_relevant:
+      - product_id: 1
+        relevance: 3
+      - product_id: 2
+        relevance: 2
+    expected_irrelevant: []
+
+  - id: "Q002"
+    query: "나이키 운동화"
+    intent: "나이키 브랜드 스니커즈/운동화 검색"
+    expected_relevant:
+      - product_id: 10
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q003"
+    query: "Nike 런닝화"
+    intent: "나이키 영문명 런닝화 검색"
+    expected_relevant:
+      - product_id: 10
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q004"
+    query: "아디 반팔"
+    intent: "아디다스 반팔 티셔츠 검색 (줄임말)"
+    expected_relevant:
+      - product_id: 20
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q005"
+    query: "Adidas 트레이닝복"
+    intent: "아디다스 영문 트레이닝복 검색"
+    expected_relevant:
+      - product_id: 21
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q006"
+    query: "뉴발 운동화"
+    intent: "뉴발란스 운동화 검색 (줄임말)"
+    expected_relevant:
+      - product_id: 30
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q007"
+    query: "노페 등산복"
+    intent: "노스페이스 등산복 검색 (줄임말)"
+    expected_relevant:
+      - product_id: 40
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q008"
+    query: "삼성 갤럭시 워치"
+    intent: "삼성 스마트워치 검색"
+    expected_relevant:
+      - product_id: 100
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q009"
+    query: "Samsung 이어폰"
+    intent: "삼성 영문 이어폰 검색"
+    expected_relevant:
+      - product_id: 101
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q010"
+    query: "LG 공청기"
+    intent: "LG 공기청정기 검색 (줄임말)"
+    expected_relevant:
+      - product_id: 110
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q011"
+    query: "다이슨 청소기"
+    intent: "다이슨 무선청소기 검색"
+    expected_relevant:
+      - product_id: 120
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q012"
+    query: "Dyson 헤어드라이어"
+    intent: "다이슨 영문 헤어드라이어 검색"
+    expected_relevant:
+      - product_id: 121
+        relevance: 2
+    expected_irrelevant: []
+
+  - id: "Q013"
+    query: "에팟 프로"
+    intent: "에어팟 프로 검색 (줄임말)"
+    expected_relevant:
+      - product_id: 130
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q014"
+    query: "소니 헤드폰"
+    intent: "소니 노이즈캔슬링 헤드폰 검색"
+    expected_relevant:
+      - product_id: 140
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q015"
+    query: "보스 스피커"
+    intent: "보스/Bose 블루투스 스피커 검색"
+    expected_relevant:
+      - product_id: 150
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q016"
+    query: "유니클로 히트텍"
+    intent: "유니클로 보온 내의 검색"
+    expected_relevant:
+      - product_id: 160
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q017"
+    query: "설화수 에센스"
+    intent: "설화수 브랜드 에센스 검색"
+    expected_relevant:
+      - product_id: 170
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q018"
+    query: "정관장 홍삼"
+    intent: "정관장 홍삼 건강식품 검색"
+    expected_relevant:
+      - product_id: 180
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q019"
+    query: "코웨이 정수기"
+    intent: "코웨이 정수기 검색"
+    expected_relevant:
+      - product_id: 190
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q020"
+    query: "쿠쿠 압력밥솥"
+    intent: "쿠쿠 전기압력밥솥 검색"
+    expected_relevant:
+      - product_id: 200
+        relevance: 3
+    expected_irrelevant: []
+
+  # 줄임말/신조어 - 15개
+  - id: "Q021"
+    query: "갓성비 무선청소기"
+    intent: "가성비 좋은 무선 청소기 검색"
+    expected_relevant:
+      - product_id: 210
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q022"
+    query: "캐구 롱패딩"
+    intent: "캐나다구스 롱패딩 검색"
+    expected_relevant:
+      - product_id: 1
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q023"
+    query: "에팟 케이스"
+    intent: "에어팟 케이스 검색"
+    expected_relevant:
+      - product_id: 220
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q024"
+    query: "아이패 케이스"
+    intent: "아이패드 케이스 검색 (줄임말)"
+    expected_relevant:
+      - product_id: 230
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q025"
+    query: "갤탭 충전기"
+    intent: "갤럭시탭 충전기 검색 (줄임말)"
+    expected_relevant:
+      - product_id: 240
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q026"
+    query: "건식 이어폰"
+    intent: "인이어 이어폰 검색"
+    expected_relevant:
+      - product_id: 101
+        relevance: 2
+    expected_irrelevant: []
+
+  - id: "Q027"
+    query: "면도 크림"
+    intent: "면도용 쉐이빙 크림 검색"
+    expected_relevant:
+      - product_id: 250
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q028"
+    query: "자취생 필수템"
+    intent: "자취 생활 필수 용품 검색"
+    expected_relevant:
+      - product_id: 260
+        relevance: 2
+    expected_irrelevant: []
+
+  - id: "Q029"
+    query: "홈트 기구"
+    intent: "홈트레이닝 운동 기구 검색"
+    expected_relevant:
+      - product_id: 270
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q030"
+    query: "냉방병 예방 카디건"
+    intent: "냉방 추위 방지 얇은 카디건 검색"
+    expected_relevant:
+      - product_id: 280
+        relevance: 2
+    expected_irrelevant: []
+
+  - id: "Q031"
+    query: "핫팩 손난로"
+    intent: "겨울 손난로/핫팩 검색"
+    expected_relevant:
+      - product_id: 290
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q032"
+    query: "맥북 파우치"
+    intent: "맥북/노트북 파우치 검색"
+    expected_relevant:
+      - product_id: 300
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q033"
+    query: "득근 보충제"
+    intent: "근육 발달 단백질 보충제 검색 (득근=운동 신조어)"
+    expected_relevant:
+      - product_id: 310
+        relevance: 2
+    expected_irrelevant: []
+
+  - id: "Q034"
+    query: "피부 장벽 크림"
+    intent: "피부 장벽 강화 보습 크림"
+    expected_relevant:
+      - product_id: 320
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q035"
+    query: "아침 기상 커피"
+    intent: "아침에 마시기 좋은 드립 커피"
+    expected_relevant:
+      - product_id: 330
+        relevance: 2
+    expected_irrelevant: []
+
+  # 복합명사 - 15개
+  - id: "Q036"
+    query: "무선블루투스이어폰"
+    intent: "무선 블루투스 이어폰 검색 (붙여쓰기)"
+    expected_relevant:
+      - product_id: 101
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q037"
+    query: "남성용겨울장갑"
+    intent: "남성 겨울 장갑 검색 (붙여쓰기)"
+    expected_relevant:
+      - product_id: 340
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q038"
+    query: "여성등산화방수"
+    intent: "여성 등산화 방수 기능 검색"
+    expected_relevant:
+      - product_id: 350
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q039"
+    query: "스마트폰케이스투명"
+    intent: "스마트폰 투명 케이스 검색"
+    expected_relevant:
+      - product_id: 360
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q040"
+    query: "노트북거치대접이식"
+    intent: "접이식 노트북 거치대 검색"
+    expected_relevant:
+      - product_id: 370
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q041"
+    query: "고양이용화장실커버"
+    intent: "고양이 커버형 화장실 검색"
+    expected_relevant:
+      - product_id: 380
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q042"
+    query: "어린이자전거보조바퀴"
+    intent: "어린이 보조바퀴 자전거 검색"
+    expected_relevant:
+      - product_id: 390
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q043"
+    query: "주방세제친환경대용량"
+    intent: "친환경 대용량 주방 세제 검색"
+    expected_relevant:
+      - product_id: 400
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q044"
+    query: "충전식전동칫솔교체헤드"
+    intent: "충전식 전동칫솔 교체헤드 검색"
+    expected_relevant:
+      - product_id: 410
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q045"
+    query: "겨울왕국캐릭터가방"
+    intent: "겨울왕국 캐릭터 어린이 가방"
+    expected_relevant:
+      - product_id: 420
+        relevance: 2
+    expected_irrelevant: []
+
+  - id: "Q046"
+    query: "사무실용다리마사지기"
+    intent: "사무실에서 사용하는 다리 마사지기"
+    expected_relevant:
+      - product_id: 430
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q047"
+    query: "강아지사료소형견"
+    intent: "소형견용 강아지 사료 검색"
+    expected_relevant:
+      - product_id: 440
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q048"
+    query: "낚시용방수장갑"
+    intent: "낚시 방수 장갑 검색"
+    expected_relevant:
+      - product_id: 450
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q049"
+    query: "여행용화장품파우치방수"
+    intent: "방수 여행용 화장품 파우치 검색"
+    expected_relevant:
+      - product_id: 460
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q050"
+    query: "임산부요가매트미끄럼방지"
+    intent: "임산부 미끄럼방지 요가매트 검색"
+    expected_relevant:
+      - product_id: 470
+        relevance: 3
+    expected_irrelevant: []
+
+  # 오타 - 10개
+  - id: "Q051"
+    query: "블루투쓰 이어폰"
+    intent: "블루투스 이어폰 검색 (오타)"
+    expected_relevant:
+      - product_id: 101
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q052"
+    query: "에어팟프로"
+    intent: "에어팟 프로 검색 (띄어쓰기 없음)"
+    expected_relevant:
+      - product_id: 130
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q053"
+    query: "나이끼 운동화"
+    intent: "나이키 운동화 검색 (오타)"
+    expected_relevant:
+      - product_id: 10
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q054"
+    query: "패딩점퍼 겨울"
+    intent: "겨울 패딩 점퍼 검색"
+    expected_relevant:
+      - product_id: 1
+        relevance: 2
+    expected_irrelevant: []
+
+  - id: "Q055"
+    query: "삼송 청소기"
+    intent: "삼성 청소기 검색 (오타)"
+    expected_relevant:
+      - product_id: 110
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q056"
+    query: "아이폰 케이쓰"
+    intent: "아이폰 케이스 검색 (오타)"
+    expected_relevant:
+      - product_id: 480
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q057"
+    query: "여성 핸드빽"
+    intent: "여성 핸드백 검색 (오타)"
+    expected_relevant:
+      - product_id: 490
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q058"
+    query: "스마트 워치 갤럭씨"
+    intent: "갤럭시 스마트워치 검색 (오타)"
+    expected_relevant:
+      - product_id: 100
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q059"
+    query: "리모컨 벌브 스마트전구"
+    intent: "스마트 LED 전구 검색"
+    expected_relevant:
+      - product_id: 500
+        relevance: 2
+    expected_irrelevant: []
+
+  - id: "Q060"
+    query: "쎄탁기 드럼형"
+    intent: "세탁기 드럼형 검색 (오타)"
+    expected_relevant:
+      - product_id: 510
+        relevance: 3
+    expected_irrelevant: []
+
+  # 카테고리 모호성 - 10개
+  - id: "Q061"
+    query: "배"
+    intent: "과일 배 검색 (모호성: 선박/신체/과일)"
+    expected_relevant:
+      - product_id: 520
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q062"
+    query: "크림"
+    intent: "화장품 크림 검색 (모호성: 식품/화장품)"
+    expected_relevant:
+      - product_id: 530
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q063"
+    query: "배낭"
+    intent: "등산/여행 배낭 검색"
+    expected_relevant:
+      - product_id: 540
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q064"
+    query: "마스크"
+    intent: "미용 마스크팩 검색"
+    expected_relevant:
+      - product_id: 550
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q065"
+    query: "세럼"
+    intent: "피부 세럼/에센스 검색"
+    expected_relevant:
+      - product_id: 560
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q066"
+    query: "가방"
+    intent: "일반 가방 검색 (여러 카테고리 해당)"
+    expected_relevant:
+      - product_id: 570
+        relevance: 2
+    expected_irrelevant: []
+
+  - id: "Q067"
+    query: "밴드"
+    intent: "피트니스 밴드/운동 밴드 검색"
+    expected_relevant:
+      - product_id: 580
+        relevance: 2
+    expected_irrelevant: []
+
+  - id: "Q068"
+    query: "파운데이션"
+    intent: "화장품 파운데이션 검색"
+    expected_relevant:
+      - product_id: 590
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q069"
+    query: "링"
+    intent: "요가링/필라테스링 검색"
+    expected_relevant:
+      - product_id: 600
+        relevance: 2
+    expected_irrelevant: []
+
+  - id: "Q070"
+    query: "글로브"
+    intent: "스포츠 장갑/글러브 검색"
+    expected_relevant:
+      - product_id: 610
+        relevance: 3
+    expected_irrelevant: []
+
+  # 일반 키워드 - 30개
+  - id: "Q071"
+    query: "겨울 코트"
+    intent: "겨울 코트 검색"
+    expected_relevant:
+      - product_id: 620
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q072"
+    query: "무선 충전기"
+    intent: "스마트폰 무선 충전기 검색"
+    expected_relevant:
+      - product_id: 630
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q073"
+    query: "운동화 남성"
+    intent: "남성 운동화 검색"
+    expected_relevant:
+      - product_id: 640
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q074"
+    query: "요가 매트"
+    intent: "요가 매트 검색"
+    expected_relevant:
+      - product_id: 650
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q075"
+    query: "수분 크림 보습"
+    intent: "보습 수분 크림 검색"
+    expected_relevant:
+      - product_id: 660
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q076"
+    query: "단백질 보충제"
+    intent: "운동 단백질 보충제 검색"
+    expected_relevant:
+      - product_id: 670
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q077"
+    query: "로봇 청소기"
+    intent: "로봇 청소기 검색"
+    expected_relevant:
+      - product_id: 680
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q078"
+    query: "선크림 자외선 차단"
+    intent: "자외선 차단 선크림 검색"
+    expected_relevant:
+      - product_id: 690
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q079"
+    query: "커피 원두"
+    intent: "커피 원두 검색"
+    expected_relevant:
+      - product_id: 700
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q080"
+    query: "캠핑 텐트"
+    intent: "캠핑 텐트 검색"
+    expected_relevant:
+      - product_id: 710
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q081"
+    query: "여성 원피스 여름"
+    intent: "여름 여성 원피스 검색"
+    expected_relevant:
+      - product_id: 720
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q082"
+    query: "노트북 거치대"
+    intent: "노트북 거치대 검색"
+    expected_relevant:
+      - product_id: 730
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q083"
+    query: "공기청정기 가정용"
+    intent: "가정용 공기청정기 검색"
+    expected_relevant:
+      - product_id: 740
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q084"
+    query: "아이 장난감 블록"
+    intent: "어린이 레고/블록 장난감 검색"
+    expected_relevant:
+      - product_id: 750
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q085"
+    query: "등산 배낭 30L"
+    intent: "30L 등산 배낭 검색"
+    expected_relevant:
+      - product_id: 760
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q086"
+    query: "칫솔 전동"
+    intent: "전동 칫솔 검색"
+    expected_relevant:
+      - product_id: 770
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q087"
+    query: "침대 매트리스 퀸"
+    intent: "퀸사이즈 침대 매트리스 검색"
+    expected_relevant:
+      - product_id: 780
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q088"
+    query: "남성 청바지 슬림"
+    intent: "슬림핏 남성 청바지 검색"
+    expected_relevant:
+      - product_id: 790
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q089"
+    query: "헤드폰 노이즈캔슬링"
+    intent: "노이즈캔슬링 헤드폰 검색"
+    expected_relevant:
+      - product_id: 800
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q090"
+    query: "강아지 사료 소형"
+    intent: "소형견 사료 검색"
+    expected_relevant:
+      - product_id: 810
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q091"
+    query: "에어프라이어 오븐"
+    intent: "에어프라이어 검색"
+    expected_relevant:
+      - product_id: 820
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q092"
+    query: "보드게임 가족"
+    intent: "가족용 보드게임 검색"
+    expected_relevant:
+      - product_id: 830
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q093"
+    query: "소파 3인용 패브릭"
+    intent: "패브릭 소재 3인용 소파 검색"
+    expected_relevant:
+      - product_id: 840
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q094"
+    query: "선풍기 DC 모터"
+    intent: "DC 모터 선풍기 검색"
+    expected_relevant:
+      - product_id: 850
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q095"
+    query: "여행 캐리어 20인치"
+    intent: "20인치 여행 캐리어 검색"
+    expected_relevant:
+      - product_id: 860
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q096"
+    query: "목 베개 여행"
+    intent: "여행용 목 베개 검색"
+    expected_relevant:
+      - product_id: 870
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q097"
+    query: "색연필 어린이"
+    intent: "어린이용 색연필 검색"
+    expected_relevant:
+      - product_id: 880
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q098"
+    query: "스타킹 여성 겨울"
+    intent: "여성 겨울 스타킹 검색"
+    expected_relevant:
+      - product_id: 890
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q099"
+    query: "가습기 초음파 대용량"
+    intent: "대용량 초음파 가습기 검색"
+    expected_relevant:
+      - product_id: 900
+        relevance: 3
+    expected_irrelevant: []
+
+  - id: "Q100"
+    query: "립스틱 매트 지속력"
+    intent: "지속력 좋은 매트 립스틱 검색"
+    expected_relevant:
+      - product_id: 910
+        relevance: 3
+    expected_irrelevant: []
