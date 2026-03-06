@@ -1,0 +1,3 @@
+# Korean e-commerce product synonyms
+# Format: term1, term2, term3 (equivalent) or term1 => term2 (one-way)
+# This file is reloaded without downtime via POST /_reload_search_analyzers
