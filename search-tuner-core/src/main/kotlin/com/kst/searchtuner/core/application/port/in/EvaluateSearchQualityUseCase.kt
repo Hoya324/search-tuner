@@ -42,6 +42,7 @@ interface EvaluateSearchQualityUseCase {
     fun runEvaluation(command: RunEvaluationCommand): EvaluationResult
     fun compareEvaluations(command: CompareEvaluationCommand): ComparisonReport
     fun getEvaluationById(id: Long): EvaluationResult?
+    fun getAllEvaluations(): List<EvaluationResult>
     fun getQuerySets(): List<String>
     fun saveQuerySet(id: String, entries: List<QueryEntry>)
 }

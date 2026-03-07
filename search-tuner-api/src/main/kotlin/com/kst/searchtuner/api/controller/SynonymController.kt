@@ -94,6 +94,13 @@ class SynonymController(
         )
     }
 
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a synonym set by ID")
+    fun delete(@PathVariable id: Long): Map<String, Boolean> {
+        synonymPersistencePort.delete(id)
+        return mapOf("success" to true)
+    }
+
     @PatchMapping("/{id}/groups/{groupId}")
     @Operation(summary = "Update a synonym group within a synonym set")
     fun updateGroup(

@@ -81,6 +81,9 @@ class SearchQualityEvaluationService(
 
     override fun getEvaluationById(id: Long): EvaluationResult? = evaluationResultPort.findById(id)
 
+    override fun getAllEvaluations(): List<EvaluationResult> =
+        evaluationResultPort.findAll().sortedBy { it.createdAt }
+
     override fun getQuerySets(): List<String> = querySets.keys.toList()
 
     override fun saveQuerySet(id: String, entries: List<QueryEntry>) {

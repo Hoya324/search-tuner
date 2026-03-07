@@ -4,6 +4,7 @@ import com.kst.searchtuner.api.dto.request.CompareEvaluationRequest
 import com.kst.searchtuner.api.dto.request.CreateQuerySetRequest
 import com.kst.searchtuner.api.dto.request.RunEvaluationRequest
 import com.kst.searchtuner.api.dto.response.ComparisonReportResponse
+import com.kst.searchtuner.api.dto.response.EvaluationMetricsResponse
 import com.kst.searchtuner.api.dto.response.EvaluationResponse
 import com.kst.searchtuner.core.application.port.`in`.CompareEvaluationCommand
 import com.kst.searchtuner.core.application.port.`in`.EvaluateSearchQualityUseCase
@@ -52,6 +53,11 @@ class EvaluationController(
             ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(EvaluationResponse.from(result))
     }
+
+    @GetMapping("/metrics")
+    @Operation(summary = "Get aggregated evaluation metrics for charts and comparison")
+    fun getMetrics(): EvaluationMetricsResponse =
+        EvaluationMetricsResponse.from(evaluateSearchQualityUseCase.getAllEvaluations())
 
     @GetMapping("/query-sets")
     @Operation(summary = "List available query set IDs")

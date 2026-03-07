@@ -17,6 +17,8 @@ class JpaShopAdapter(
     override fun findAll(): List<Shop> =
         shopJpaRepository.findAll().map { it.toDomain() }
 
+    override fun countAll(): Long = shopJpaRepository.count()
+
     override fun save(shop: Shop): Shop =
         shopJpaRepository.save(ShopJpaEntity.from(shop)).toDomain()
 
