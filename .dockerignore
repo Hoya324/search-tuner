@@ -1,0 +1,12 @@
+.git
+.env
+*.md
+docs/
+search-tuner-*/src/test/
+**/build/classes/
+**/build/tmp/
+**/build/reports/
+.gradle/
+gradle/
+gradlew
+gradlew.bat

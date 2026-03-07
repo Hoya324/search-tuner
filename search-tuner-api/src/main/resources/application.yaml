@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: ${JPA_DDL_AUTO:validate}
     show-sql: false
     properties:
       hibernate:
@@ -31,6 +31,9 @@ es:
   port: ${ES_PORT:9200}
   synonyms:
     path: ${ES_SYNONYMS_PATH:./docker/elasticsearch/config/synonyms/product_synonyms.txt}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,https://v0-kst.vercel.app}
 
 server:
   port: 8080

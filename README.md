@@ -74,74 +74,51 @@ curl "http://localhost:8080/api/v1/index/jobs/{위에서받은jobId}"
 Docker Hub 이미지: [`hoya324/kst:latest`](https://hub.docker.com/r/hoya324/kst)
 
 #### 사전 조건
-- Docker Desktop만 있으면 됨 (Java, 코드 불필요)
+- Docker Desktop만 있으면 됨 (Java, Gradle 불필요)
 
-#### 1단계 — 이 저장소의 docker 관련 파일만 받기
+#### 1단계 — 저장소 클론
 
 ```bash
 git clone <repo-url>
 cd search-tuner
 ```
 
-또는 `docker-compose.yml`과 `docker/` 폴더만 복사해도 됩니다.
-
 #### 2단계 — 환경변수 설정
 
 ```bash
-echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env
-```
-
-#### 3단계 — docker-compose.override.yml 작성
-
-```bash
-cat > docker-compose.override.yml << 'EOF'
-services:
-  app:
-    image: hoya324/kst:latest
-    build: ~
-    profiles: []
-    environment:
-      GEMINI_API_KEY: ${GEMINI_API_KEY}
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/search_tuner?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: tuner
-      SPRING_DATASOURCE_PASSWORD: tuner123
-      ES_HOST: elasticsearch
-      ES_PORT: "9200"
-    ports:
-      - "8080:8080"
-    depends_on:
-      mysql:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
+cat > .env << 'EOF'
+GEMINI_API_KEY=your_gemini_api_key_here
+MYSQL_ROOT_PASSWORD=your_root_password
+MYSQL_USER=tuner
+MYSQL_PASSWORD=your_strong_password
 EOF
 ```
 
-#### 4단계 — 전체 기동
+#### 3단계 — 기동
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose.hub.yml up -d
 ```
 
-MySQL + Elasticsearch + App 세 컨테이너가 모두 기동됩니다.
+MySQL + Elasticsearch(Nori) + App 세 컨테이너가 자동으로 기동됩니다.
 
 ```bash
 # 상태 확인
-docker compose ps
+docker compose -f docker-compose.hub.yml ps
 curl http://localhost:8080/api/v1/status
 ```
 
-#### 5단계 — 데이터 색인
+#### 4단계 — 데이터 색인
 
 ```bash
 curl -X POST "http://localhost:8080/api/v1/index/full?indexName=products"
 ```
 
-#### 이미지 최신화 방법
+#### 이미지 최신화
 
 ```bash
 docker pull hoya324/kst:latest
-docker compose up -d --force-recreate app
+docker compose -f docker-compose.hub.yml up -d --force-recreate app
 ```
 
 ---
