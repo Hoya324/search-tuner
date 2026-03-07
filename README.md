@@ -69,47 +69,79 @@ curl "http://localhost:8080/api/v1/index/jobs/{위에서받은jobId}"
 브라우저에서 [https://v0-kst.vercel.app/search](https://v0-kst.vercel.app/search) 접속
 ---
 
-### 방법 B. Docker Hub에서 pull하여 실행 (팀 공유용)
+### 방법 B. Docker Hub 이미지로 실행 (코드 없이 바로 사용)
 
-> Docker Hub에 이미지가 배포된 경우 사용. 아래는 배포 및 사용 방법입니다.
+Docker Hub 이미지: [`hoya324/kst:latest`](https://hub.docker.com/r/hoya324/kst)
 
-#### 이미지 빌드 및 Docker Hub 배포 (배포자만 수행)
+#### 사전 조건
+- Docker Desktop만 있으면 됨 (Java, 코드 불필요)
+
+#### 1단계 — 이 저장소의 docker 관련 파일만 받기
 
 ```bash
-# 1. 앱 JAR 빌드
-./gradlew :search-tuner-api:bootJar
-
-# 2. Docker 이미지 빌드
-docker build -f search-tuner-api/Dockerfile -t your-dockerhub-id/search-tuner-api:latest .
-
-# 3. Docker Hub 로그인 및 push
-docker login
-docker push your-dockerhub-id/search-tuner-api:latest
+git clone <repo-url>
+cd search-tuner
 ```
 
-#### 이미지 pull하여 실행 (팀원)
+또는 `docker-compose.yml`과 `docker/` 폴더만 복사해도 됩니다.
+
+#### 2단계 — 환경변수 설정
 
 ```bash
-# 1. docker-compose.override.yml 작성 (app 서비스가 빌드 대신 이미지를 사용하도록)
+echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env
+```
+
+#### 3단계 — docker-compose.override.yml 작성
+
+```bash
 cat > docker-compose.override.yml << 'EOF'
 services:
   app:
-    image: your-dockerhub-id/search-tuner-api:latest
+    image: hoya324/kst:latest
     build: ~
     profiles: []
     environment:
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/search_tuner?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: tuner
+      SPRING_DATASOURCE_PASSWORD: tuner123
+      ES_HOST: elasticsearch
+      ES_PORT: "9200"
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
 EOF
+```
 
-# 2. .env 파일 생성
-echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env
+#### 4단계 — 전체 기동
 
-# 3. 전체 기동 (MySQL + ES + App 모두)
-docker compose --profile full up -d
+```bash
+docker compose up -d
+```
 
-# 4. 정상 기동 확인
+MySQL + Elasticsearch + App 세 컨테이너가 모두 기동됩니다.
+
+```bash
+# 상태 확인
 docker compose ps
 curl http://localhost:8080/api/v1/status
+```
+
+#### 5단계 — 데이터 색인
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/index/full?indexName=products"
+```
+
+#### 이미지 최신화 방법
+
+```bash
+docker pull hoya324/kst:latest
+docker compose up -d --force-recreate app
 ```
 
 ---
