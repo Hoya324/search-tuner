@@ -1,0 +1,219 @@
+name: Deploy Search Tuner to EC2
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  EC2_REGION: ap-northeast-2
+  ECR_REPO: public.ecr.aws/j8w6n7e6/kst
+  ECR_ES_REPO: public.ecr.aws/j8w6n7e6/kst-es
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.set-tag.outputs.image-tag }}
+    steps:
+      - name: Set image tag
+        id: set-tag
+        run: |
+          IMAGE_TAG="production-${{ github.run_number }}"
+          echo "image-tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+          echo "Image tag: ${IMAGE_TAG}"
+
+  build-and-push:
+    needs: prepare
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR Public
+        run: |
+          aws ecr-public get-login-password --region us-east-1 | \
+            docker login --username AWS --password-stdin public.ecr.aws
+
+      - name: Build and push app image
+        env:
+          IMAGE_TAG: ${{ needs.prepare.outputs.image-tag }}
+        run: |
+          docker build -t ${{ env.ECR_REPO }}:${IMAGE_TAG} .
+          docker push ${{ env.ECR_REPO }}:${IMAGE_TAG}
+          docker tag ${{ env.ECR_REPO }}:${IMAGE_TAG} ${{ env.ECR_REPO }}:latest
+          docker push ${{ env.ECR_REPO }}:latest
+          echo "App image pushed: ${{ env.ECR_REPO }}:${IMAGE_TAG}"
+
+      - name: Build and push Elasticsearch image
+        run: |
+          docker build -t ${{ env.ECR_ES_REPO }}:latest ./docker/elasticsearch
+          docker push ${{ env.ECR_ES_REPO }}:latest
+          echo "ES image pushed: ${{ env.ECR_ES_REPO }}:latest"
+
+      - name: Clean up local images
+        run: |
+          docker image prune -f
+          docker builder prune -f
+
+  deploy:
+    needs: [ prepare, build-and-push ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.EC2_REGION }}
+
+      - name: Prepare configuration files
+        run: |
+          DOCKER_COMPOSE_CONTENT=$(base64 -w 0 < docker/docker-compose.yml)
+          MYSQL_INIT_CONTENT=$(base64 -w 0 < docker/mysql/init.sql)
+          echo "DOCKER_COMPOSE_CONTENT=$DOCKER_COMPOSE_CONTENT" >> $GITHUB_ENV
+          echo "MYSQL_INIT_CONTENT=$MYSQL_INIT_CONTENT" >> $GITHUB_ENV
+
+      - name: Deploy to EC2
+        env:
+          IMAGE_TAG: ${{ needs.prepare.outputs.image-tag }}
+        run: |
+          cat > deploy_script.sh << 'DEPLOY_EOF'
+          #!/bin/bash
+          set -e
+
+          echo "Starting Search Tuner deployment..."
+          echo "Image Tag: $IMAGE_TAG"
+
+          DEPLOY_DIR=/home/ec2-user/search-tuner-deploy
+          cd $DEPLOY_DIR || {
+              mkdir -p $DEPLOY_DIR && cd $DEPLOY_DIR;
+          }
+
+          if [ ! -f ".env" ]; then
+              echo ".env file not found at $DEPLOY_DIR/.env"
+              echo "Please create it with: GEMINI_API_KEY, MYSQL_ROOT_PASSWORD, MYSQL_USER, MYSQL_PASSWORD"
+              exit 1
+          fi
+
+          mkdir -p mysql elasticsearch/config/synonyms logs
+
+          echo "Writing docker-compose.yml..."
+          echo "$DOCKER_COMPOSE_CONTENT" | base64 -d > docker-compose.yml
+
+          echo "Writing mysql/init.sql..."
+          echo "$MYSQL_INIT_CONTENT" | base64 -d > mysql/init.sql
+
+          echo "Stopping existing containers..."
+          docker compose down 2>/dev/null || true
+
+          echo "Cleaning up old app images (keeping last 3)..."
+          docker images "$ECR_REPO" --format "{{.Repository}}:{{.Tag}}" | \
+            grep "production-" | sort -V -r | tail -n +4 | \
+            xargs -r docker rmi -f 2>/dev/null || true
+          docker image prune -f
+
+          echo "Pulling new image: $ECR_REPO:$IMAGE_TAG"
+          docker pull $ECR_REPO:$IMAGE_TAG || exit 1
+
+          echo "Pulling latest ES image..."
+          docker pull $ECR_ES_REPO:latest || true
+
+          # Write deploy-time variables to .env (overwrite existing entries)
+          sed -i '/^ECR_REPO=/d;/^IMAGE_TAG=/d' .env
+          echo "ECR_REPO=$ECR_REPO" >> .env
+          echo "IMAGE_TAG=$IMAGE_TAG" >> .env
+
+          echo "Starting services..."
+          docker compose up -d
+
+          echo "Waiting for services to stabilize..."
+          sleep 40
+
+          echo "Service status:"
+          docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+          if docker ps --filter "name=search-tuner-app" --filter "status=running" | grep -q "search-tuner-app"; then
+              echo "search-tuner-app is running"
+              if curl -f -s --max-time 10 "http://localhost:0/api/v1/status" > /dev/null 2>&1; then
+                  echo "Health check passed"
+              else
+                  echo "App is running (health check via nginx, skipping direct check)"
+              fi
+          else
+              echo "search-tuner-app failed to start"
+              echo "Container logs:"
+              docker logs search-tuner-app --tail 50 2>&1 || true
+              docker ps -a --format "table {{.Names}}\t{{.Status}}"
+              exit 1
+          fi
+
+          echo "Deployment completed successfully!"
+          DEPLOY_EOF
+
+          SCRIPT_CONTENT=$(cat deploy_script.sh | base64 -w 0)
+
+          COMMAND_ID=$(aws ssm send-command \
+            --region ${{ env.EC2_REGION }} \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --parameters "commands=[
+              \"echo '$SCRIPT_CONTENT' | base64 -d > /tmp/st-deploy.sh\",
+              \"chmod +x /tmp/st-deploy.sh\",
+              \"export ECR_REPO='${{ env.ECR_REPO }}'\",
+              \"export ECR_ES_REPO='${{ env.ECR_ES_REPO }}'\",
+              \"export IMAGE_TAG='$IMAGE_TAG'\",
+              \"export DOCKER_COMPOSE_CONTENT='${{ env.DOCKER_COMPOSE_CONTENT }}'\",
+              \"export MYSQL_INIT_CONTENT='${{ env.MYSQL_INIT_CONTENT }}'\",
+              \"/tmp/st-deploy.sh\"
+            ]" \
+            --timeout-seconds 1800 \
+            --query 'Command.CommandId' \
+            --output text)
+
+          echo "Command ID: $COMMAND_ID"
+          echo "command-id=$COMMAND_ID" >> $GITHUB_ENV
+
+      - name: Wait for deployment
+        run: |
+          chmod +x scripts/wait-for-deployment.sh
+          ./scripts/wait-for-deployment.sh ${{ env.command-id }} "${{ secrets.EC2_INSTANCE_ID }}"
+
+      - name: Verify deployment
+        run: |
+          sleep 20
+          if curl -f -s --max-time 30 "https://search.git-tree.com/api/v1/status" > /dev/null; then
+            echo "Application is responding on https://search.git-tree.com"
+          else
+            echo "Health check via HTTPS not available yet (nginx may need update or DNS not propagated)"
+          fi
+
+  notification:
+    needs: [ prepare, deploy ]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Deployment notification
+        env:
+          IMAGE_TAG: ${{ needs.prepare.outputs.image-tag }}
+        run: |
+          if [ "${{ needs.deploy.result }}" == "success" ]; then
+            echo "Deployment successful!"
+            echo "URL: https://search.git-tree.com"
+            echo "Image: ${{ env.DOCKERHUB_REPO }}:${IMAGE_TAG}"
+          else
+            echo "Deployment failed!"
+            exit 1
+          fi

@@ -7,6 +7,4 @@ search-tuner-*/src/test/
 **/build/tmp/
 **/build/reports/
 .gradle/
-gradle/
-gradlew
-gradlew.bat
+.idea/
