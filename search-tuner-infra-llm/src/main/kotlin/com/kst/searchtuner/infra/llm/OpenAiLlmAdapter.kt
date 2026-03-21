@@ -12,7 +12,7 @@ import org.springframework.ai.chat.client.ChatClient
 import org.springframework.stereotype.Component
 
 @Component
-class OpenAiLlmAdapter(
+class LlmAdapter(
     private val chatClient: ChatClient
 ) : LlmPort {
 

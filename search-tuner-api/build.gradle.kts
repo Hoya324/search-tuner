@@ -15,6 +15,9 @@ dependencies {
     implementation(project(":search-tuner-infra-persistence"))
     implementation(project(":search-tuner-infra-es"))
     implementation(project(":search-tuner-infra-llm"))
+    implementation(project(":search-tuner-infra-llm-gemini"))
+    implementation(project(":search-tuner-infra-llm-openai"))
+    implementation(project(":search-tuner-infra-llm-claude"))
 
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.data.jpa)

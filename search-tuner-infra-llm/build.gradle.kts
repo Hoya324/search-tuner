@@ -14,7 +14,7 @@ dependencies {
     implementation(project(":search-tuner-core"))
 
     implementation(libs.spring.boot.starter)
-    implementation(libs.spring.ai.openai.starter)
+    implementation(libs.spring.ai.openai.starter) // ChatClient 인터페이스 제공 (auto-config는 SearchTunerApplication에서 excludeName으로 차단)
     implementation(libs.kotlin.reflect)
     implementation(libs.jackson.module.kotlin)
     implementation(libs.jackson.databind)

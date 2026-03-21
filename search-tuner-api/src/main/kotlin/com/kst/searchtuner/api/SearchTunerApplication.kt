@@ -3,7 +3,12 @@ package com.kst.searchtuner.api
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import java.io.File
+
 @SpringBootApplication(
+    excludeName = [
+        "org.springframework.ai.autoconfigure.openai.OpenAiAutoConfiguration",
+        "org.springframework.ai.autoconfigure.anthropic.AnthropicAutoConfiguration",
+    ],
     scanBasePackages = [
         "com.kst.searchtuner.api",
         "com.kst.searchtuner.infra.persistence",
