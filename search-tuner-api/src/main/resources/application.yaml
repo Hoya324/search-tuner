@@ -17,6 +17,9 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: false
 
+  ai:
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY:disabled}
 
 es:
   host: ${ES_HOST:localhost}
@@ -35,11 +38,6 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     path: /api-docs
-
-spring:
-  ai:
-    anthropic:
-      api-key: ${ANTHROPIC_API_KEY:disabled}
 
 logging:
   level:
