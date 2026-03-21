@@ -61,6 +61,20 @@ services:
         condition: service_healthy
     restart: on-failure
 
+  frontend:
+    build:
+      context: ./search-tuner-frontend
+      dockerfile: Dockerfile
+    container_name: search-tuner-frontend
+    environment:
+      BACKEND_URL: http://app:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: on-failure
+
 volumes:
   mysql_data:
   es_data:

@@ -16,11 +16,12 @@ cd search-tuner
 cp .env.example .env
 # .env 에서 LLM API Key 설정 (아래 LLM 제공자 섹션 참고)
 
-# 2. 전체 스택 실행 (앱 + MySQL + Elasticsearch)
-docker compose -f docker-compose.local.yml up -d
+# 2. 전체 스택 실행 (프론트엔드 + 백엔드 + MySQL + Elasticsearch)
+docker compose -f docker-compose.local.yml up --build -d
 
 # 3. 접속 확인
-open http://localhost:8080/swagger-ui.html
+open http://localhost:3000          # 관리 UI
+open http://localhost:8080/swagger-ui.html  # REST API 문서
 ```
 
 ---
@@ -202,10 +203,15 @@ search-tuner
 
 ```bash
 # 인프라만 실행
-docker compose up mysql elasticsearch -d
+docker compose -f docker-compose.local.yml up mysql elasticsearch -d
 
-# 앱 실행 (Java 21 필요)
+# 백엔드 실행 (Java 21 필요)
 ./gradlew :search-tuner-api:bootRun
+
+# 프론트엔드 실행 (별도 터미널, Node 20 + pnpm 필요)
+cd search-tuner-frontend
+pnpm install
+pnpm dev   # http://localhost:3000
 ```
 
 `.env` 파일이 프로젝트 루트에 있으면 앱 시작 시 자동 로드됩니다.
@@ -250,8 +256,3 @@ docker compose up mysql elasticsearch -d
 | [05 - Evaluation Experiments](docs/study/05-evaluation-experiments.md) | IR 지표(nDCG, P@K, MRR) 실험 기록 |
 | [06 - LLM Prompt Tuning](docs/study/06-llm-prompt-tuning.md) | LLM 프롬프트 튜닝 실험 기록 |
 
----
-
-## 라이브 데모
-
-API: [search.git-tree.com/swagger-ui.html](https://search.git-tree.com/swagger-ui.html)

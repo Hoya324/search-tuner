@@ -41,3 +41,8 @@ out/
 
 /.env
 /.omc/
+
+### Frontend ###
+search-tuner-frontend/node_modules/
+search-tuner-frontend/.next/
+search-tuner-frontend/out/
