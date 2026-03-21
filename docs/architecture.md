@@ -75,7 +75,7 @@ graph TD
 
     subgraph Adapters_Out ["Outbound Adapters"]
         EsAdapter["ElasticsearchAdapter<br/>(infra-es)"]
-        LlmAdapter["OpenAiLlmAdapter<br/>(infra-llm)"]
+        LlmAdapter["LlmAdapter<br/>(infra-llm)"]
         JpaAdapter["JpaProductAdapter<br/>(infra-persistence)"]
     end
 
@@ -146,12 +146,17 @@ search-tuner/
 │       ├── index/MigrationJobRegistry.kt
 │       └── dto/ProductDocument.kt
 │
-├── search-tuner-infra-llm/             # Spring AI 1.0.0
+├── search-tuner-infra-llm/             # Spring AI — 공통 (인터페이스 + 어댑터 + 프롬프트)
 │   └── src/main/kotlin/.../infra/llm/
-│       ├── config/LlmConfig.kt
-│       ├── OpenAiLlmAdapter.kt         # LlmPort 구현
+│       ├── config/LlmConfig.kt         # 전략 선택 + ChatClient Bean 등록
+│       ├── provider/LlmProviderStrategy.kt  # 전략 인터페이스 (buildChatClient)
+│       ├── LlmAdapter.kt               # LlmPort 구현
 │       ├── LlmResponseParser.kt        # markdown 코드블록 strip + JSON parse
 │       └── prompt/                     # 동의어/분석기/Relevance 프롬프트 템플릿
+│
+├── search-tuner-infra-llm-gemini/      # Gemini 전략 (priority=2, GEMINI_API_KEY/MODEL)
+├── search-tuner-infra-llm-openai/      # OpenAI 전략 (priority=1, OPENAI_API_KEY/MODEL)
+├── search-tuner-infra-llm-claude/      # Claude 전략 (priority=3, ANTHROPIC_API_KEY/MODEL)
 │
 ├── search-tuner-infra-persistence/     # Spring Data JPA + MySQL
 │   └── src/main/kotlin/.../infra/persistence/
@@ -176,7 +181,7 @@ search-tuner/
 |---|---|---|
 | Spring Boot | 3.4.3 | Spring AI 호환성 확보 |
 | Kotlin | 2.1.20 | Spring Boot 3.4 BOM 기준 |
-| Spring AI | 1.0.0 GA | `spring-ai-starter-model-openai` |
+| Spring AI | 1.0.0 GA | `spring-ai-starter-model-openai` / `spring-ai-starter-model-anthropic` |
 | ES Java Client | 8.17.0 | |
 | SpringDoc OpenAPI | 2.8.5 | |
 | MySQL | 8.0 | Docker |
@@ -981,8 +986,13 @@ SPRING_DATASOURCE_USERNAME: tuner
 SPRING_DATASOURCE_PASSWORD: tuner123
 ES_HOST: localhost
 ES_PORT: 9200
-OPENAI_API_KEY: sk-...          # 동의어 생성/평가에 필요
-OPENAI_MODEL: gpt-4o-mini       # 기본값 (비용 절감)
+# LLM 제공자 중 하나 설정 (Claude > Gemini > OpenAI 우선순위)
+GEMINI_API_KEY: ...             # Google Gemini
+GEMINI_MODEL: gemini-2.5-flash-lite
+# OPENAI_API_KEY: sk-...        # OpenAI
+# OPENAI_MODEL: gpt-4o-mini
+# ANTHROPIC_API_KEY: sk-ant-... # Anthropic Claude
+# ANTHROPIC_MODEL: claude-3-5-haiku-20241022
 ES_SYNONYMS_PATH: ./docker/elasticsearch/config/synonyms/product_synonyms.txt
 ```
 
