@@ -1,9 +1,10 @@
 name: Deploy Search Tuner to EC2
 
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+#
+#on:
+#  push:
+#    branches: [ main ]
+#  workflow_dispatch:
 
 env:
   EC2_REGION: ap-northeast-2
