@@ -13,6 +13,9 @@ COPY gradlew gradlew.bat settings.gradle.kts build.gradle.kts ./
 COPY search-tuner-core/build.gradle.kts search-tuner-core/
 COPY search-tuner-infra-es/build.gradle.kts search-tuner-infra-es/
 COPY search-tuner-infra-llm/build.gradle.kts search-tuner-infra-llm/
+COPY search-tuner-infra-llm-gemini/build.gradle.kts search-tuner-infra-llm-gemini/
+COPY search-tuner-infra-llm-openai/build.gradle.kts search-tuner-infra-llm-openai/
+COPY search-tuner-infra-llm-claude/build.gradle.kts search-tuner-infra-llm-claude/
 COPY search-tuner-infra-persistence/build.gradle.kts search-tuner-infra-persistence/
 COPY search-tuner-api/build.gradle.kts search-tuner-api/
 
