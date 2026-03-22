@@ -27,6 +27,7 @@ dependencies {
     implementation(libs.springdoc.openapi.webmvc)
 
     runtimeOnly(libs.mysql.connector.j)
+    implementation("com.opencsv:opencsv:5.9")
 
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.kotlin.test.junit5)

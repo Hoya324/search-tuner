@@ -116,7 +116,7 @@ search-tuner/
 ├── build.gradle.kts                    # 루트: 공통 플러그인 버전, 서브프로젝트 공통 설정
 ├── settings.gradle.kts                 # 5개 모듈 include
 ├── gradle/libs.versions.toml           # Version Catalog (단일 버전 관리)
-├── docker-compose.yml                  # MySQL 8 + ES 8.17 (Nori)
+├── docker-compose.yml                  # MySQL 8 + ES 8.17 (Nori) + Kibana 8.17
 ├── docker/
 │   ├── elasticsearch/Dockerfile        # elasticsearch:8.17.0 + analysis-nori plugin
 │   ├── elasticsearch/config/synonyms/  # 동의어 파일 (volume mount)
@@ -186,6 +186,7 @@ search-tuner/
 | SpringDoc OpenAPI | 2.8.5 | |
 | MySQL | 8.0 | Docker |
 | Elasticsearch | 8.17.0 | Docker + Nori plugin |
+| Kibana | 8.17.0 | Docker, http://localhost:5601 |
 | Java toolchain | 21 | |
 
 ---

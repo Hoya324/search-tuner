@@ -8,6 +8,7 @@ import {
   Database,
   Settings,
   Zap,
+  ShoppingBag,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -54,6 +55,12 @@ const navItems = [
     url: "/data",
     icon: Database,
     description: "데이터 관리",
+  },
+  {
+    title: "Admin",
+    url: "/admin",
+    icon: ShoppingBag,
+    description: "상품 관리",
   },
 ]
 

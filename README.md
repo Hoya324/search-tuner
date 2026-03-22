@@ -22,6 +22,7 @@ docker compose -f docker-compose.local.yml up --build -d
 # 3. 접속 확인
 open http://localhost:3000          # 관리 UI
 open http://localhost:8080/swagger-ui.html  # REST API 문서
+open http://localhost:5601          # Kibana (ES 인덱스 탐색)
 ```
 
 ---
@@ -31,8 +32,8 @@ open http://localhost:8080/swagger-ui.html  # REST API 문서
 `.env`에서 원하는 제공자의 키와 모델을 설정합니다. **여러 키가 설정된 경우 우선순위가 높은 것이 사용**됩니다.
 
 | 우선순위 | 제공자 | API Key 환경변수 | 모델 환경변수 | 기본 모델 |
-|---------|--------|----------------|-------------|---------|
-| 3 (최우선) | Anthropic Claude | `ANTHROPIC_API_KEY` | `ANTHROPIC_MODEL` | `claude-3-5-haiku-20241022` |
+|--------|--------|----------------|-------------|---------|
+| 3 | Anthropic Claude | `ANTHROPIC_API_KEY` | `ANTHROPIC_MODEL` | `claude-3-5-haiku-20241022` |
 | 2 | Google Gemini | `GEMINI_API_KEY` | `GEMINI_MODEL` | `gemini-2.5-flash-lite` |
 | 1 | OpenAI | `OPENAI_API_KEY` | `OPENAI_MODEL` | `gpt-4o-mini` |
 
@@ -199,11 +200,11 @@ search-tuner
 
 ---
 
-## 로컬 개발 (IDE에서 앱 직접 실행)
+## 로컬 개발 (IDE 디버깅 / 핫리로드가 필요한 경우)
 
 ```bash
 # 인프라만 실행
-docker compose -f docker-compose.local.yml up mysql elasticsearch -d
+docker compose -f docker-compose.local.yml up mysql elasticsearch kibana -d
 
 # 백엔드 실행 (Java 21 필요)
 ./gradlew :search-tuner-api:bootRun
@@ -231,6 +232,7 @@ pnpm dev   # http://localhost:3000
 | Spring Boot | 3.4.3 |
 | Spring AI | 1.0.0 GA |
 | Elasticsearch | 8.17 + Nori 형태소 분석기 |
+| Kibana | 8.17 |
 | MySQL | 8.0 |
 | Java | 21 |
 

@@ -1,13 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { Database, HardDrive, Clock, FileText, RefreshCw, ExternalLink, Settings, Loader2, AlertTriangle, Info } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Clock, RefreshCw, ExternalLink, Settings, Loader2, AlertTriangle, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 import useSWR from "swr"
+import { toast } from "sonner"
 
 interface DataStatus {
   mysql: {
@@ -40,6 +42,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json())
 export function DataManager() {
   const [isReindexing, setIsReindexing] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
+  const router = useRouter()
 
   const { data, error, isLoading, mutate } = useSWR<DataStatus>("/api/index", fetcher)
 
@@ -57,8 +60,10 @@ export function DataManager() {
       }
 
       await mutate()
+      toast.success("전체 재색인 시작됨", { description: "백그라운드에서 색인이 진행됩니다" })
     } catch (err) {
       console.error("Reindex error:", err)
+      toast.error("재색인 실패", { description: err instanceof Error ? err.message : undefined })
     } finally {
       setIsReindexing(false)
     }
@@ -78,8 +83,10 @@ export function DataManager() {
       }
 
       await mutate()
+      toast.success("증분 동기화 시작됨", { description: "변경된 데이터를 동기화합니다" })
     } catch (err) {
       console.error("Sync error:", err)
+      toast.error("동기화 실패", { description: err instanceof Error ? err.message : undefined })
     } finally {
       setIsSyncing(false)
     }
@@ -133,86 +140,24 @@ export function DataManager() {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* MySQL Status */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Database className="h-4 w-4 text-primary" />
-              MySQL
-            </CardTitle>
-            <CardDescription>데이터베이스 상태</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-lg bg-secondary/50 p-4">
-                <div className="text-xs text-muted-foreground">가게</div>
-                <div className="mt-1 text-2xl font-bold">{data.mysql.stores.toLocaleString()}</div>
-              </div>
-              <div className="rounded-lg bg-secondary/50 p-4">
-                <div className="text-xs text-muted-foreground">상품</div>
-                <div className="mt-1 text-2xl font-bold">{data.mysql.products.toLocaleString()}</div>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1">
-                <FileText className="h-4 w-4 mr-1" />
-                상품 목록 보기
-              </Button>
-              <Button variant="outline" size="sm" className="flex-1">
-                <FileText className="h-4 w-4 mr-1" />
-                가게 목록 보기
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Elasticsearch Status */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <HardDrive className="h-4 w-4 text-primary" />
-              Elasticsearch
-            </CardTitle>
-            <CardDescription>색인 상태</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Index</span>
-                <div className="flex items-center gap-2">
-                  <code className="text-sm font-mono text-foreground">{data.elasticsearch.index}</code>
-                  <Badge variant="outline" className="text-[10px]">alias: {data.elasticsearch.alias}</Badge>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Documents</span>
-                <span className="text-sm font-medium">{data.elasticsearch.docs.toLocaleString()}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Size</span>
-                <span className="text-sm font-medium">{data.elasticsearch.size}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Status</span>
-                <Badge className={cn(
-                  "border",
-                  data.elasticsearch.status === "green" && "bg-success/20 text-success border-success/30",
-                  data.elasticsearch.status === "yellow" && "bg-warning/20 text-warning border-warning/30",
-                  data.elasticsearch.status === "red" && "bg-destructive/20 text-destructive border-destructive/30"
-                )}>
-                  <span className={cn(
-                    "mr-1 h-1.5 w-1.5 rounded-full",
-                    data.elasticsearch.status === "green" && "bg-success",
-                    data.elasticsearch.status === "yellow" && "bg-warning",
-                    data.elasticsearch.status === "red" && "bg-destructive"
-                  )} />
-                  {data.elasticsearch.status}
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Data Summary */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <div className="rounded-lg border border-border bg-secondary/50 p-4">
+          <div className="text-xs text-muted-foreground">가게</div>
+          <div className="mt-1 text-2xl font-bold">{data.mysql.stores.toLocaleString()}</div>
+        </div>
+        <div className="rounded-lg border border-border bg-secondary/50 p-4">
+          <div className="text-xs text-muted-foreground">상품</div>
+          <div className="mt-1 text-2xl font-bold">{data.mysql.products.toLocaleString()}</div>
+        </div>
+        <div className="rounded-lg border border-border bg-secondary/50 p-4">
+          <div className="text-xs text-muted-foreground">색인 문서 수</div>
+          <div className="mt-1 text-2xl font-bold">{data.elasticsearch.docs.toLocaleString()}</div>
+        </div>
+        <div className="rounded-lg border border-border bg-secondary/50 p-4">
+          <div className="text-xs text-muted-foreground">인덱스</div>
+          <div className="mt-1 text-sm font-mono font-bold">{data.elasticsearch.index}</div>
+        </div>
       </div>
 
       {/* Index Configuration */}
@@ -223,7 +168,7 @@ export function DataManager() {
               <CardTitle className="text-base">인덱스 설정</CardTitle>
               <CardDescription>현재 적용된 분석기 및 동의어 설정</CardDescription>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => router.push("/settings")}>
               <Settings className="h-4 w-4 mr-1" />
               설정 보기
             </Button>

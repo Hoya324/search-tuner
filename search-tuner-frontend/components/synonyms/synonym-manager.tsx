@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Pencil, Trash2, AlertTriangle, CheckCircle2, Sparkles, RefreshCw, Download, Loader2 } from "lucide-react"
+import { Search, Pencil, Trash2, AlertTriangle, CheckCircle2, Sparkles, Download, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -10,8 +10,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 import useSWR, { mutate } from "swr"
 
 interface SynonymGroup {
@@ -35,12 +37,19 @@ export function SynonymManager() {
   const [generatedSynonyms, setGeneratedSynonyms] = useState<SynonymGroup[]>([])
   const [applyStrategy, setApplyStrategy] = useState("reload")
   const [selectedSynonyms, setSelectedSynonyms] = useState<Set<number>>(new Set())
+  const [generatedSetId, setGeneratedSetId] = useState<number | null>(null)
   const [generateConfig, setGenerateConfig] = useState({
     index: "products",
     field: "product_name",
     category: "all",
     sampleSize: 2000,
   })
+  const [generateMode, setGenerateMode] = useState<"standard" | "from-product">("standard")
+  const [productNameInput, setProductNameInput] = useState("")
+  const [excludeExisting, setExcludeExisting] = useState(true)
+  const [previewContent, setPreviewContent] = useState<string | null>(null)
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false)
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false)
 
   const { data: synonymsData, error } = useSWR<{ synonyms: SynonymGroup[], lastUpdated: string }>("/api/synonyms", fetcher)
 
@@ -57,52 +66,78 @@ export function SynonymManager() {
   const handleGenerate = async () => {
     setIsGenerating(true)
     try {
-      const response = await fetch("/api/synonyms/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(generateConfig),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to generate synonyms")
+      let response: Response
+      if (generateMode === "from-product") {
+        if (!productNameInput.trim()) return
+        response = await fetch("/api/synonyms/generate-from-product", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productName: productNameInput.trim(), excludeExisting }),
+        })
+      } else {
+        response = await fetch("/api/synonyms/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(generateConfig),
+        })
       }
+
+      if (!response.ok) throw new Error("Failed to generate synonyms")
 
       const data = await response.json()
       setGeneratedSynonyms(data.synonyms || [])
+      setGeneratedSetId(data.synonymSetId ?? null)
       setSelectedSynonyms(new Set((data.synonyms || []).filter((s: SynonymGroup) => s.approved !== false).map((s: SynonymGroup) => s.id)))
       setShowGenerateDialog(false)
+      toast.success("동의어 생성 완료", { description: `${(data.synonyms || []).length}개 그룹이 생성되었습니다` })
     } catch (err) {
       console.error("Generate error:", err)
+      toast.error("동의어 생성 실패", { description: err instanceof Error ? err.message : undefined })
     } finally {
       setIsGenerating(false)
     }
   }
 
+  const handleShowPreview = async () => {
+    if (!generatedSetId) return
+    setIsLoadingPreview(true)
+    try {
+      const response = await fetch(`/api/synonyms/${generatedSetId}/preview`)
+      if (!response.ok) throw new Error("Failed to fetch preview")
+      const text = await response.text()
+      setPreviewContent(text)
+      setShowPreviewDialog(true)
+    } catch (err) {
+      console.error("Preview error:", err)
+      toast.error("미리보기 실패")
+    } finally {
+      setIsLoadingPreview(false)
+    }
+  }
+
   const handleApplySynonyms = async () => {
     setIsApplying(true)
+    setShowPreviewDialog(false)
     try {
-      const selectedGroups = generatedSynonyms.filter(s => selectedSynonyms.has(s.id))
-      
-      // POST /api/synonyms/apply -> /api/v1/synonyms/{id}/apply
-      // 선택된 동의어를 먼저 저장한 후 apply 호출
       const response = await fetch("/api/synonyms/apply", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          synonyms: selectedGroups,
+          synonymSetId: generatedSetId,
           strategy: applyStrategy === "reload" ? "RELOAD" : "BLUE_GREEN",
         }),
       })
 
-      if (!response.ok) {
-        throw new Error("Failed to apply synonyms")
-      }
+      if (!response.ok) throw new Error("Failed to apply synonyms")
 
       mutate("/api/synonyms")
       setGeneratedSynonyms([])
+      setGeneratedSetId(null)
       setSelectedSynonyms(new Set())
+      toast.success("동의어 적용 완료")
     } catch (err) {
       console.error("Apply error:", err)
+      toast.error("동의어 적용 실패", { description: err instanceof Error ? err.message : undefined })
     } finally {
       setIsApplying(false)
     }
@@ -110,17 +145,13 @@ export function SynonymManager() {
 
   const handleDeleteSynonym = async (id: number) => {
     try {
-      const response = await fetch(`/api/synonyms?id=${id}`, {
-        method: "DELETE",
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to delete synonym")
-      }
-
+      const response = await fetch(`/api/synonyms?id=${id}`, { method: "DELETE" })
+      if (!response.ok) throw new Error("Failed to delete synonym")
       mutate("/api/synonyms")
+      toast.success("동의어 삭제 완료")
     } catch (err) {
       console.error("Delete error:", err)
+      toast.error("동의어 삭제 실패")
     }
   }
 
@@ -134,16 +165,23 @@ export function SynonymManager() {
     setSelectedSynonyms(newSet)
   }
 
-  const handleDownloadSynonyms = () => {
-    const selectedGroups = generatedSynonyms.filter(s => selectedSynonyms.has(s.id))
-    const synonymText = selectedGroups.map(s => s.terms.join(", ")).join("\n")
-    const blob = new Blob([synonymText], { type: "text/plain" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = "synonyms.txt"
-    a.click()
-    URL.revokeObjectURL(url)
+  const handleDownloadSynonyms = async () => {
+    if (!generatedSetId) return
+    try {
+      const response = await fetch(`/api/synonyms/${generatedSetId}/preview`)
+      if (!response.ok) throw new Error("Failed to fetch")
+      const text = await response.text()
+      const blob = new Blob([text], { type: "text/plain" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `synonyms_${generatedSetId}.txt`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success("다운로드 완료")
+    } catch {
+      toast.error("다운로드 실패")
+    }
   }
 
   const approvedCount = [...selectedSynonyms].length
@@ -232,9 +270,9 @@ export function SynonymManager() {
                     <Button variant="ghost" size="icon" className="h-8 w-8">
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className="h-8 w-8 text-destructive hover:text-destructive"
                       onClick={() => handleDeleteSynonym(synonym.id)}
                     >
@@ -273,67 +311,101 @@ export function SynonymManager() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Index</Label>
-              <Select 
-                value={generateConfig.index}
-                onValueChange={(v) => setGenerateConfig(prev => ({ ...prev, index: v }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="products">products</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Field</Label>
-              <Select 
-                value={generateConfig.field}
-                onValueChange={(v) => setGenerateConfig(prev => ({ ...prev, field: v }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="product_name">product_name</SelectItem>
-                  <SelectItem value="description">description</SelectItem>
-                  <SelectItem value="brand">brand</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Category (optional)</Label>
-              <Select 
-                value={generateConfig.category}
-                onValueChange={(v) => setGenerateConfig(prev => ({ ...prev, category: v }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">전체</SelectItem>
-                  <SelectItem value="fashion">Fashion</SelectItem>
-                  <SelectItem value="electronics">Electronics</SelectItem>
-                  <SelectItem value="food">Food</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Sample Size</Label>
-              <Input 
-                type="number" 
-                value={generateConfig.sampleSize}
-                onChange={(e) => setGenerateConfig(prev => ({ ...prev, sampleSize: parseInt(e.target.value) || 2000 }))}
+            <div className="flex items-center justify-between">
+              <Label>특정 상품명으로 생성</Label>
+              <Switch
+                checked={generateMode === "from-product"}
+                onCheckedChange={(checked) => setGenerateMode(checked ? "from-product" : "standard")}
               />
             </div>
+
+            {generateMode === "from-product" ? (
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label>상품명 입력</Label>
+                  <Input
+                    placeholder="예: 두쫀쿠, 삼성 갤럭시 탭"
+                    value={productNameInput}
+                    onChange={(e) => setProductNameInput(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">쉼표로 여러 상품명 입력 가능</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="exclude-existing"
+                    checked={excludeExisting}
+                    onCheckedChange={(v) => setExcludeExisting(!!v)}
+                  />
+                  <Label htmlFor="exclude-existing" className="text-sm font-normal cursor-pointer">
+                    기존 동의어 제외
+                  </Label>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Index</Label>
+                  <Select
+                    value={generateConfig.index}
+                    onValueChange={(v) => setGenerateConfig(prev => ({ ...prev, index: v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="products">products</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Field</Label>
+                  <Select
+                    value={generateConfig.field}
+                    onValueChange={(v) => setGenerateConfig(prev => ({ ...prev, field: v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="product_name">product_name</SelectItem>
+                      <SelectItem value="description">description</SelectItem>
+                      <SelectItem value="brand">brand</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Category (optional)</Label>
+                  <Select
+                    value={generateConfig.category}
+                    onValueChange={(v) => setGenerateConfig(prev => ({ ...prev, category: v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">전체</SelectItem>
+                      <SelectItem value="fashion">Fashion</SelectItem>
+                      <SelectItem value="electronics">Electronics</SelectItem>
+                      <SelectItem value="food">Food</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Sample Size</Label>
+                  <Input
+                    type="number"
+                    value={generateConfig.sampleSize}
+                    onChange={(e) => setGenerateConfig(prev => ({ ...prev, sampleSize: parseInt(e.target.value) || 2000 }))}
+                  />
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowGenerateDialog(false)}>
               취소
             </Button>
-            <Button onClick={handleGenerate} disabled={isGenerating}>
+            <Button onClick={handleGenerate} disabled={isGenerating || (generateMode === "from-product" && !productNameInput.trim())}>
               {isGenerating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -442,8 +514,17 @@ export function SynonymManager() {
             </div>
 
             <div className="flex gap-2">
-              <Button className="flex-1" onClick={handleApplySynonyms} disabled={isApplying || approvedCount === 0}>
-                {isApplying ? (
+              <Button
+                className="flex-1"
+                onClick={handleShowPreview}
+                disabled={isApplying || isLoadingPreview || approvedCount === 0 || !generatedSetId}
+              >
+                {isLoadingPreview ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    미리보기 로딩...
+                  </>
+                ) : isApplying ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     적용 중...
@@ -455,7 +536,7 @@ export function SynonymManager() {
                   </>
                 )}
               </Button>
-              <Button variant="outline" onClick={handleDownloadSynonyms}>
+              <Button variant="outline" onClick={handleDownloadSynonyms} disabled={!generatedSetId}>
                 <Download className="h-4 w-4 mr-2" />
                 synonym.txt
               </Button>
@@ -463,6 +544,37 @@ export function SynonymManager() {
           </CardContent>
         </Card>
       )}
+
+      {/* Preview Dialog */}
+      <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>동의어 파일 미리보기</DialogTitle>
+            <DialogDescription>
+              Elasticsearch에 적용될 synonyms.txt 내용입니다
+            </DialogDescription>
+          </DialogHeader>
+          <pre className="rounded-md bg-muted p-4 text-xs font-mono overflow-auto max-h-80 whitespace-pre-wrap">
+            {previewContent || "(비어있음)"}
+          </pre>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPreviewDialog(false)}>취소</Button>
+            <Button onClick={handleApplySynonyms} disabled={isApplying}>
+              {isApplying ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  적용 중...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  확인 후 적용
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

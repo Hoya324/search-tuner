@@ -14,9 +14,8 @@ export function StatusBar({ className }: StatusBarProps) {
     refreshInterval: 10000,
   })
 
-  const esConnected = data?.connected ?? false
+  const backendConnected = !error && (data?.connected ?? false)
   const docsCount = data?.docsCount ?? 0
-  const mysqlConnected = data?.mysqlConnected ?? false
 
   return (
     <div
@@ -27,31 +26,16 @@ export function StatusBar({ className }: StatusBarProps) {
     >
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <span>Elasticsearch:</span>
+          <span>Backend:</span>
           <span className="flex items-center gap-1">
             <span
               className={cn(
                 "h-2 w-2 rounded-full",
-                esConnected ? "bg-success" : "bg-destructive"
+                backendConnected ? "bg-success" : "bg-destructive"
               )}
             />
-            <span className={esConnected ? "text-success" : "text-destructive"}>
-              {error ? "Error" : esConnected ? "Connected" : "Disconnected"}
-            </span>
-          </span>
-        </div>
-        <div className="h-3 w-px bg-border" />
-        <div className="flex items-center gap-2">
-          <span>MySQL:</span>
-          <span className="flex items-center gap-1">
-            <span
-              className={cn(
-                "h-2 w-2 rounded-full",
-                mysqlConnected ? "bg-success" : "bg-destructive"
-              )}
-            />
-            <span className={mysqlConnected ? "text-success" : "text-destructive"}>
-              {mysqlConnected ? "Connected" : "Disconnected"}
+            <span className={backendConnected ? "text-success" : "text-destructive"}>
+              {error ? "Error" : backendConnected ? "Connected" : "Disconnected"}
             </span>
           </span>
         </div>
@@ -61,7 +45,7 @@ export function StatusBar({ className }: StatusBarProps) {
         </div>
       </div>
       <div className="text-muted-foreground/60">
-        Backend: <span className="font-mono">localhost:8080</span>
+        Search Tuner
       </div>
     </div>
   )

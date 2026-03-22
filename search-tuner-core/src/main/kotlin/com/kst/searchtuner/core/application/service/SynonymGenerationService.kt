@@ -2,6 +2,7 @@ package com.kst.searchtuner.core.application.service
 
 import com.kst.searchtuner.core.application.port.`in`.GenerateSynonymCommand
 import com.kst.searchtuner.core.application.port.`in`.GenerateSynonymUseCase
+import com.kst.searchtuner.core.application.port.`in`.ProductSuggestionResult
 import com.kst.searchtuner.core.application.port.out.ElasticsearchPort
 import com.kst.searchtuner.core.application.port.out.LlmPort
 import com.kst.searchtuner.core.application.port.out.SynonymPersistencePort
@@ -59,6 +60,67 @@ class SynonymGenerationService(
     }
 
     override fun listAll(): List<SynonymSet> = synonymPersistencePort.findAll()
+
+    override fun generateFromProduct(productName: String, excludeExisting: Boolean): SynonymSet {
+        val existingTerms = if (excludeExisting) {
+            synonymPersistencePort.findAll()
+                .flatMap { it.groups }
+                .flatMap { it.terms }
+                .toSet()
+        } else emptySet()
+
+        val relatedNames = elasticsearchPort.sampleFieldValues(
+            indexName = "products",
+            field = "product_name.keyword",
+            size = 50
+        ).filter { it.contains(productName, ignoreCase = true) || productName.contains(it, ignoreCase = true) }
+            .ifEmpty { listOf(productName) }
+
+        val groups = llmPort.suggestSynonyms(productName, relatedNames)
+            .filter { suggestion -> suggestion.terms.any { it !in existingTerms } }
+            .map { suggestion ->
+                SynonymGroup(
+                    id = UUID.randomUUID().toString(),
+                    terms = suggestion.terms,
+                    type = SynonymType.valueOf(suggestion.type),
+                    confidence = suggestion.confidence,
+                    reasoning = suggestion.reasoning
+                )
+            }
+
+        val synonymSet = SynonymSet(
+            name = "상품명 기반: $productName",
+            groups = groups
+        )
+        return synonymPersistencePort.save(synonymSet)
+    }
+
+    override fun suggestForProduct(productName: String, category: String?): ProductSuggestionResult {
+        val allSets = synonymPersistencePort.findAll()
+
+        val existingGroups = allSets.flatMap { set ->
+            set.groups.mapIndexed { idx, group ->
+                Pair(set.id * 10000L + idx, group.terms)
+            }
+        }.filter { (_, terms) ->
+            terms.any { term ->
+                productName.contains(term, ignoreCase = true) || term.contains(productName, ignoreCase = true)
+            }
+        }
+
+        val suggestedNewTerms = if (existingGroups.isEmpty()) {
+            try {
+                llmPort.suggestSynonyms(category ?: productName, listOf(productName))
+                    .take(3)
+                    .flatMap { it.terms }
+                    .distinct()
+            } catch (e: Exception) {
+                emptyList()
+            }
+        } else emptyList()
+
+        return ProductSuggestionResult(existingGroups, suggestedNewTerms)
+    }
 
     /**
      * Merges synonym groups that share common terms to avoid contradictions.

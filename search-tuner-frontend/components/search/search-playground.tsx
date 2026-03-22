@@ -243,7 +243,10 @@ export function SearchPlayground() {
                           {result.matchInfo && (
                             <div className="mt-2 flex items-center gap-1 text-xs">
                               <span className="text-muted-foreground">매칭:</span>
-                              <span className="text-primary">{result.matchInfo}</span>
+                              <span
+                                className="text-primary [&_em]:not-italic [&_em]:font-semibold [&_em]:text-primary [&_em]:bg-primary/10 [&_em]:px-0.5 [&_em]:rounded"
+                                dangerouslySetInnerHTML={{ __html: result.matchInfo }}
+                              />
                             </div>
                           )}
                         </div>

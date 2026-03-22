@@ -9,6 +9,7 @@ import com.kst.searchtuner.api.dto.response.TokenAnalysisResponse
 import com.kst.searchtuner.core.application.port.`in`.AnalyzeTextQuery
 import com.kst.searchtuner.core.application.port.`in`.RecommendAnalyzerUseCase
 import com.kst.searchtuner.core.application.port.`in`.SearchProductQuery
+import com.kst.searchtuner.core.application.port.out.ProductPersistencePort
 import com.kst.searchtuner.core.application.service.ProductService
 import com.kst.searchtuner.core.domain.product.Product
 import io.swagger.v3.oas.annotations.Operation
@@ -21,16 +22,21 @@ import org.springframework.web.bind.annotation.*
 @Tag(name = "Products", description = "Product management and search")
 class ProductController(
     private val productService: ProductService,
-    private val recommendAnalyzerUseCase: RecommendAnalyzerUseCase
+    private val recommendAnalyzerUseCase: RecommendAnalyzerUseCase,
+    private val productPersistencePort: ProductPersistencePort
 ) {
 
     @GetMapping
-    @Operation(summary = "List products with pagination")
+    @Operation(summary = "List products with pagination, optionally filtered by shopId")
     fun listProducts(
         @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "20") size: Int
+        @RequestParam(defaultValue = "20") size: Int,
+        @RequestParam(required = false) shopId: Long?
     ): List<ProductResponse> =
-        productService.findAll(page, size).map { ProductResponse.from(it) }
+        if (shopId != null)
+            productPersistencePort.findByShopId(shopId).map { ProductResponse.from(it) }
+        else
+            productService.findAll(page, size).map { ProductResponse.from(it) }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get product by ID")
@@ -81,6 +87,13 @@ class ProductController(
             )
         )
         return SearchResponse.from(result)
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a product by ID")
+    fun deleteProduct(@PathVariable id: Long): ResponseEntity<Void> {
+        productPersistencePort.delete(id)
+        return ResponseEntity.noContent().build()
     }
 
     @PostMapping("/search/analyze")

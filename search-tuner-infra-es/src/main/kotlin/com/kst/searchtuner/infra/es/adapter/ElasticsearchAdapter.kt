@@ -61,6 +61,7 @@ class ElasticsearchAdapter(
                 brand = source["brand"]?.toString(),
                 category = source["category"]?.toString() ?: "",
                 score = hit.score()?.toDouble() ?: 0.0,
+                price = (source["price"] as? Number)?.toDouble(),
                 highlights = hit.highlight().mapValues { (_, v) -> v }
             )
         }

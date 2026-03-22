@@ -1,89 +1,30 @@
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
+import { Info, ExternalLink } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export default function SettingsPage() {
   return (
     <DashboardLayout
       title="Settings"
-      description="시스템 설정 및 연결 관리"
+      description="시스템 설정 관리"
     >
       <div className="space-y-6 max-w-2xl">
-        {/* Elasticsearch Connection */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Elasticsearch 연결</CardTitle>
-            <CardDescription>Elasticsearch 클러스터 연결 설정</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Host URL</Label>
-              <Input defaultValue="http://localhost:9200" />
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Username (optional)</Label>
-                <Input placeholder="elastic" />
-              </div>
-              <div className="space-y-2">
-                <Label>Password (optional)</Label>
-                <Input type="password" placeholder="********" />
-              </div>
-            </div>
-            <Button>연결 테스트</Button>
-          </CardContent>
-        </Card>
-
-        {/* MySQL Connection */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">MySQL 연결</CardTitle>
-            <CardDescription>데이터베이스 연결 설정</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Host</Label>
-              <Input defaultValue="localhost" />
-            </div>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="space-y-2">
-                <Label>Port</Label>
-                <Input defaultValue="3306" />
-              </div>
-              <div className="space-y-2">
-                <Label>Database</Label>
-                <Input defaultValue="search_tuner" />
-              </div>
-              <div className="space-y-2">
-                <Label>Username</Label>
-                <Input defaultValue="root" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Password</Label>
-              <Input type="password" placeholder="********" />
-            </div>
-            <Button>연결 테스트</Button>
-          </CardContent>
-        </Card>
-
-        {/* LLM Settings */}
+        {/* LLM Settings - Read Only */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">LLM 설정</CardTitle>
-            <CardDescription>AI 동의어 생성 및 품질 평가에 사용할 LLM 설정</CardDescription>
+            <CardDescription>AI 설정은 서버 환경 변수(.env)로 관리됩니다</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>OpenAI API Key</Label>
-              <Input type="password" placeholder="sk-..." />
-            </div>
-            <div className="space-y-2">
-              <Label>Model</Label>
-              <Input defaultValue="gpt-4o" />
+          <CardContent>
+            <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950/30">
+              <Info className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                LLM 모델 및 API 키는 서버의 <code className="font-mono text-xs bg-blue-100 dark:bg-blue-900 px-1 rounded">.env</code> 파일에서 관리됩니다.
+                변경하려면 환경 변수를 수정 후 서버를 재시작하세요.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -116,9 +57,26 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end">
-          <Button>설정 저장</Button>
-        </div>
+        {/* Quick Links */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">빠른 링크</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <a href="http://localhost:8080/swagger-ui" target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-4 w-4 mr-1" />
+                Swagger UI
+              </a>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <a href="http://localhost:5601" target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-4 w-4 mr-1" />
+                Kibana
+              </a>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   )

@@ -12,4 +12,5 @@ interface ProductPersistencePort {
     fun countAll(): Long
     fun save(product: Product): Product
     fun saveAll(products: List<Product>): List<Product>
+    fun delete(id: Long)
 }

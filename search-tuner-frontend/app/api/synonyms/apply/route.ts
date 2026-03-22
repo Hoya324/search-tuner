@@ -2,45 +2,32 @@ import { NextRequest, NextResponse } from "next/server"
 import { fetchFromBackend } from "@/lib/api"
 
 // POST /api/v1/synonyms/{id}/apply - 동의어 적용 (RELOAD or BLUE_GREEN)
-// 프론트엔드에서 여러 동의어를 한번에 보내므로, 먼저 동의어를 저장한 후 apply 호출
+// FE sends: { synonymSetId, strategy }
+// BE: POST /api/v1/synonyms/{id}/apply with { strategy, indexName }
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { synonyms, strategy } = body
-    
-    // 1. 먼저 동의어들을 저장 (POST /api/v1/synonyms)
-    const saveResponse = await fetchFromBackend("/api/v1/synonyms", {
-      method: "POST",
-      body: JSON.stringify({ synonyms }),
-    })
+    const { synonymSetId, strategy } = body
 
-    if (!saveResponse.ok) {
-      const errorText = await saveResponse.text()
-      return NextResponse.json(
-        { error: errorText },
-        { status: saveResponse.status }
-      )
+    if (!synonymSetId) {
+      return NextResponse.json({ error: "synonymSetId is required" }, { status: 400 })
     }
 
-    const saveData = await saveResponse.json()
-    const synonymSetId = saveData.id // 저장된 동의어 셋 ID
-
-    // 2. 저장된 동의어 셋을 적용 (POST /api/v1/synonyms/{id}/apply)
-    const applyResponse = await fetchFromBackend(`/api/v1/synonyms/${synonymSetId}/apply`, {
+    const response = await fetchFromBackend(`/api/v1/synonyms/${synonymSetId}/apply`, {
       method: "POST",
-      body: JSON.stringify({ strategy }),
+      body: JSON.stringify({
+        strategy: strategy || "RELOAD",
+        indexName: "products",
+      }),
     })
 
-    if (!applyResponse.ok) {
-      const errorText = await applyResponse.text()
-      return NextResponse.json(
-        { error: errorText },
-        { status: applyResponse.status }
-      )
+    if (!response.ok) {
+      const errorText = await response.text()
+      return NextResponse.json({ error: errorText }, { status: response.status })
     }
 
-    const applyData = await applyResponse.json()
-    return NextResponse.json(applyData)
+    const data = await response.json()
+    return NextResponse.json(data)
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Failed to apply synonyms" },

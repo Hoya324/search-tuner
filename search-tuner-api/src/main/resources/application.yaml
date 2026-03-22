@@ -20,6 +20,8 @@ spring:
   ai:
     anthropic:
       api-key: ${ANTHROPIC_API_KEY:disabled}
+    openai:
+      api-key: ${OPENAI_API_KEY:${GEMINI_API_KEY:disabled}}
 
 es:
   host: ${ES_HOST:localhost}

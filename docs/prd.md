@@ -93,12 +93,12 @@ docker compose up 한 번으로 전체 환경 구동
 │  │          │───→│  (Spring Boot)   │───→│  + Nori      │  │
 │  │ 가게/상품 │    │                  │    │  + 동의어     │  │
 │  │ DB       │    │  - 상품 API      │    │              │  │
-│  └──────────┘    │  - 검색 API      │    └──────────────┘  │
-│                  │  - 색인 API      │                       │
-│                  │  - 동의어 생성   │                       │
-│                  │  - 분析기 추천   │                       │
-│                  │  - 품질 평가     │                       │
-│                  └──────────────────┘                       │
+│  └──────────┘    │  - 검색 API      │    └──────┬───────┘  │
+│                  │  - 색인 API      │           │          │
+│                  │  - 동의어 생성   │    ┌──────▼───────┐  │
+│                  │  - 분析기 추천   │    │   Kibana     │  │
+│                  │  - 품질 평가     │    │   :5601      │  │
+│                  └──────────────────┘    └──────────────┘  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -302,7 +302,8 @@ Docker 초기 구동 시 자동으로 삽입되는 데모 데이터:
 | ES Client | **Elasticsearch Java Client 8.x** | 공식 클라이언트, type-safe API |
 | LLM | **Spring AI** | OpenAI/Claude 추상화, Provider 교체 용이 |
 | API Docs | **SpringDoc OpenAPI (Swagger)** | REST API 자동 문서화 |
-| Container | **Docker Compose** | MySQL + ES + App 원클릭 실행 |
+| Observability | **Kibana 8.17** | ES 인덱스/쿼리 시각화, http://localhost:5601 |
+| Container | **Docker Compose** | MySQL + ES + Kibana + App 원클릭 실행 |
 
 ---
 

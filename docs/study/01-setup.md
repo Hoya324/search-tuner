@@ -5,7 +5,7 @@
 ```bash
 # Docker 기동 확인
 docker compose ps
-# → search-tuner-mysql, search-tuner-es 모두 healthy 상태여야 함
+# → search-tuner-mysql, search-tuner-es, search-tuner-kibana 모두 healthy 상태여야 함
 
 # 앱 실행
 ./gradlew :search-tuner-api:bootRun
@@ -90,7 +90,7 @@ curl "http://localhost:9200/products/_search?size=3&pretty"
 
 ## 체크리스트
 
-- [ ] Docker 컨테이너 2개(MySQL, ES) 모두 healthy
+- [ ] Docker 컨테이너 3개(MySQL, ES, Kibana) 모두 healthy
 - [ ] 앱 정상 기동 (포트 8080)
 - [ ] 전체 색인 완료 (10,000건)
 - [ ] 기본 검색 응답 확인

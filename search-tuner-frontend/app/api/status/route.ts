@@ -14,7 +14,12 @@ export async function GET() {
     }
     
     const data = await response.json()
-    return NextResponse.json(data)
+    // BE returns nested { elasticsearch: { connected, documentCount }, mysql: { connected } }
+    return NextResponse.json({
+      connected: data?.elasticsearch?.connected ?? false,
+      docsCount: data?.elasticsearch?.documentCount ?? 0,
+      mysqlConnected: data?.mysql?.connected ?? false,
+    })
   } catch (error) {
     return NextResponse.json(
       { 

@@ -15,6 +15,7 @@ data class SearchHit(
     val brand: String?,
     val category: String,
     val score: Double,
+    val price: Double? = null,
     val highlights: Map<String, List<String>> = emptyMap(),
     val explanation: String? = null
 )

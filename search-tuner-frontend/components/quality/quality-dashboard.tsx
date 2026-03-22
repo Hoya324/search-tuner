@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { TrendingUp, TrendingDown, CheckCircle2, AlertTriangle, ArrowRight, Loader2, Play, Info } from "lucide-react"
+import { TrendingUp, TrendingDown, CheckCircle2, AlertTriangle, ArrowRight, Loader2, Play, Info, ListChecks } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -67,12 +68,23 @@ export function QualityDashboard() {
       })
 
       if (!response.ok) {
-        throw new Error("Comparison failed")
+        const data = await response.json().catch(() => ({}))
+        const msg = data?.error ?? "비교 실패"
+        if (response.status >= 500) {
+          toast.error("비교 실행 실패", {
+            description: "평가 데이터가 없습니다. 먼저 각 Config로 '평가 실행'을 완료해야 합니다.",
+            duration: 8000,
+          })
+        } else {
+          toast.error("비교 실행 실패", { description: msg })
+        }
+        return
       }
 
       await mutate()
+      toast.success("비교 완료")
     } catch (err) {
-      console.error("Comparison error:", err)
+      toast.error("비교 실행 오류", { description: err instanceof Error ? err.message : undefined })
     } finally {
       setIsRunning(false)
     }
@@ -171,7 +183,7 @@ export function QualityDashboard() {
               <span>nDCG@10:</span>
               {data.chartData.map((point, i) => (
                 <span key={i} className="flex items-center gap-1">
-                  <span className="font-medium text-foreground">{point.value.toFixed(2)}</span>
+                  <span className="font-medium text-foreground">{(point.value ?? 0).toFixed(2)}</span>
                   {i < data.chartData.length - 1 && <ArrowRight className="h-3 w-3" />}
                 </span>
               ))}
@@ -241,12 +253,12 @@ export function QualityDashboard() {
                     {data.metricsComparison.map((row) => (
                       <TableRow key={row.metric}>
                         <TableCell className="font-medium">{row.metric}</TableCell>
-                        <TableCell className="text-right font-mono">{row.configA.toFixed(4)}</TableCell>
-                        <TableCell className="text-right font-mono">{row.configB.toFixed(4)}</TableCell>
+                        <TableCell className="text-right font-mono">{(row.configA ?? 0).toFixed(4)}</TableCell>
+                        <TableCell className="text-right font-mono">{(row.configB ?? 0).toFixed(4)}</TableCell>
                         <TableCell className="text-right">
                           <span className={`flex items-center justify-end gap-1 ${row.change >= 0 ? 'text-success' : 'text-destructive'}`}>
                             {row.change >= 0 ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
-                            {row.change >= 0 ? '+' : ''}{row.change.toFixed(1)}%
+                            {row.change >= 0 ? '+' : ''}{(row.change ?? 0).toFixed(1)}%
                           </span>
                         </TableCell>
                       </TableRow>
@@ -256,7 +268,7 @@ export function QualityDashboard() {
                         <TableCell className="font-medium">p-value</TableCell>
                         <TableCell className="text-right"></TableCell>
                         <TableCell className="text-right"></TableCell>
-                        <TableCell className="text-right font-mono">{data.pValue.toFixed(4)}</TableCell>
+                        <TableCell className="text-right font-mono">{(data.pValue ?? 0).toFixed(4)}</TableCell>
                       </TableRow>
                     )}
                   </TableBody>
@@ -304,8 +316,8 @@ export function QualityDashboard() {
                       {data.improvedQueries.map((row) => (
                         <TableRow key={row.query}>
                           <TableCell className="font-medium text-sm">{row.query}</TableCell>
-                          <TableCell className="text-right font-mono text-sm">{row.scoreA.toFixed(2)}</TableCell>
-                          <TableCell className="text-right font-mono text-sm">{row.scoreB.toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-mono text-sm">{(row.scoreA ?? 0).toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-mono text-sm">{(row.scoreB ?? 0).toFixed(2)}</TableCell>
                           <TableCell className="text-right">
                             <span className="text-success text-sm">+{row.change}%</span>
                           </TableCell>
@@ -355,8 +367,8 @@ export function QualityDashboard() {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell className="text-right font-mono text-sm">{row.scoreA.toFixed(2)}</TableCell>
-                          <TableCell className="text-right font-mono text-sm">{row.scoreB.toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-mono text-sm">{(row.scoreA ?? 0).toFixed(2)}</TableCell>
+                          <TableCell className="text-right font-mono text-sm">{(row.scoreB ?? 0).toFixed(2)}</TableCell>
                           <TableCell className="text-right">
                             <span className="text-destructive text-sm">{row.change}%</span>
                           </TableCell>
@@ -389,7 +401,7 @@ export function QualityDashboard() {
                   <span className="text-lg font-bold text-primary">κ</span>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{data.llmJudge.kappa.toFixed(2)}</div>
+                  <div className="text-2xl font-bold">{(data.llmJudge.kappa ?? 0).toFixed(2)}</div>
                   <div className="text-xs text-muted-foreground">Cohen&apos;s Kappa</div>
                 </div>
               </div>

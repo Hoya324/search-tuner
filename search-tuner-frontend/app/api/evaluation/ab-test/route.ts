@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from "next/server"
 import { fetchFromBackend } from "@/lib/api"
 
-// POST /api/v1/evaluation/ab-test - A/B 테스트 실행
+// POST /api/v1/evaluation/compare - A/B 테스트 실행 (configA/configB → configLabelA/configLabelB)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
-    const response = await fetchFromBackend("/api/v1/evaluation/ab-test", {
+
+    const response = await fetchFromBackend("/api/v1/evaluation/compare", {
       method: "POST",
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        configLabelA: body.configA,
+        configLabelB: body.configB,
+      }),
     })
     
     if (!response.ok) {

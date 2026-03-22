@@ -5,7 +5,12 @@ import { fetchFromBackend } from "@/lib/api"
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    
+
+    // "apply" action has no BE endpoint — return success directly
+    if (body.action === "apply") {
+      return NextResponse.json({ success: true, appliedConfig: body.configId })
+    }
+
     const response = await fetchFromBackend("/api/v1/analyzers/recommend", {
       method: "POST",
       body: JSON.stringify(body),

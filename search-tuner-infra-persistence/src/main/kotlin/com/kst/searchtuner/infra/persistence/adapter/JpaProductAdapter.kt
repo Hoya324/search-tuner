@@ -36,4 +36,6 @@ class JpaProductAdapter(
 
     override fun saveAll(products: List<Product>): List<Product> =
         productJpaRepository.saveAll(products.map { ProductJpaEntity.from(it) }).map { it.toDomain() }
+
+    override fun delete(id: Long) = productJpaRepository.deleteById(id)
 }
